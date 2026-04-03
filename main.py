@@ -8,7 +8,7 @@ from spam import register_spam
 from help import register_help
 
 GLOBAL_CLIENTS = {}
-bot = TelegramClient('SmokerHost', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
+bot = TelegramClient('Smoker_Host_v2', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 
 @bot.on(events.NewMessage(pattern='/start'))
 async def start(event):
