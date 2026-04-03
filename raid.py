@@ -4,14 +4,14 @@ from telethon import events
 from data import RAID, REPLYRAID, ALTRON, MRAID, SRAID, CRAID 
 from config import SUDO_USERS, OWNER_ID, hl
 
-REPLY_RAID_LIST = []
-
 def register_raid(client):
-    
+    # UNIQUE LIST FOR EACH HOSTED CLIENT
+    # This ensures User A's raid list is separated from User B's raid list
+    reply_raid_list = []
+
     # --- STANDARD RAID ---
     @client.on(events.NewMessage(pattern=r"\%sraid(?: |$)(.*)" % hl))
     async def raid(e):
-        # e.out ensures the hosted user's own commands are recognized
         if getattr(e, 'out', False) or e.sender_id in SUDO_USERS:
             xraid = e.text.split(" ", 2)
             uid = None
@@ -38,9 +38,9 @@ def register_raid(client):
     # --- REPLY RAID LISTENER ---
     @client.on(events.NewMessage())
     async def reply_raid_exec(event):
-        global REPLY_RAID_LIST
+        # Checks the unique list for THIS specific client only
         check = f"{event.sender_id}_{event.chat_id}"
-        if check in REPLY_RAID_LIST:
+        if check in reply_raid_list:
             await asyncio.sleep(0.1)
             await event.client.send_message(event.chat_id, choice(REPLYRAID), reply_to=event.message.id)
 
@@ -55,10 +55,9 @@ def register_raid(client):
             if user_id in ALTRON or user_id == OWNER_ID or user_id in SUDO_USERS:
                 await e.reply("ɴᴏ, ᴛʜɪꜱ ɢᴜʏ ɪꜱ ᴘʀᴏᴛᴇᴄᴛᴇᴅ.")
             else:
-                global REPLY_RAID_LIST
                 check = f"{user_id}_{e.chat_id}"
-                if check not in REPLY_RAID_LIST: 
-                    REPLY_RAID_LIST.append(check)
+                if check not in reply_raid_list: 
+                    reply_raid_list.append(check)
                 await e.reply("» ᴀᴄᴛɪᴠᴀᴛᴇᴅ ʀᴇᴘʟʏʀᴀɪᴅ !! ✅")
 
     # --- DEACTIVATE REPLY RAID ---
@@ -70,9 +69,8 @@ def register_raid(client):
             user_id = entity.id if len(text) == 2 else entity.sender_id
             
             check = f"{user_id}_{e.chat_id}"
-            global REPLY_RAID_LIST
-            if check in REPLY_RAID_LIST: 
-                REPLY_RAID_LIST.remove(check)
+            if check in reply_raid_list: 
+                reply_raid_list.remove(check)
             await e.reply("» ʀᴇᴘʟʏ ʀᴀɪᴅ ᴅᴇ-ᴀᴄᴛɪᴠᴀᴛᴇᴅ !! ✅")
 
     # --- MRAID (LOVE RAID) ---
@@ -128,4 +126,4 @@ def register_raid(client):
                     await asyncio.sleep(0.1)
             except Exception:
                 await e.reply(f"Usage: {hl}craid <count> <username> OR {hl}craid <count> <reply>")
-            
+                
