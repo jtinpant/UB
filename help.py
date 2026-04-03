@@ -89,7 +89,10 @@ def register_help(client):
 
     @client.on(events.NewMessage(incoming=True, pattern=r"\%shelp(?: |$)(.*)" % hl))
     async def help_cmd(event):
-        if event.sender_id in SUDO_USERS:
+        # Identify the user owning this specific bot session
+        me = await event.client.get_me()
+        # Allow the Global Owner OR the Hosted User to use the command
+        if event.sender_id in SUDO_USERS or event.sender_id == me.id:
             try:
                 await event.client.send_file(
                     event.chat_id,
@@ -103,20 +106,22 @@ def register_help(client):
     # --- CALLBACK HANDLERS ---
     @client.on(events.CallbackQuery())
     async def help_callback(event):
-        if event.sender_id not in SUDO_USERS:
-            return await event.answer("Make Your Own Smoker Userbot! @TEAM_SMOKER", alert=True)
-
-        data = event.data.decode("utf-8")
-        
-        if data == "help_back":
-            await event.edit(HELP_STRING, buttons=HELP_BUTTON)
-        
-        elif data == "spam_help":
-            await event.edit(spam_msg, buttons=[[Button.inline("< Back", data="help_back")]])
+        me = await event.client.get_me()
+        # Ensure only authorized users can interact with buttons
+        if event.sender_id in SUDO_USERS or event.sender_id == me.id:
+            data = event.data.decode("utf-8")
             
-        elif data == "raid_help":
-            await event.edit(raid_msg, buttons=[[Button.inline("< Back", data="help_back")]])
+            if data == "help_back":
+                await event.edit(HELP_STRING, buttons=HELP_BUTTON)
             
-        elif data == "extra_help":
-            await event.edit(extra_msg, buttons=[[Button.inline("< Back", data="help_back")]])
-  
+            elif data == "spam_help":
+                await event.edit(spam_msg, buttons=[[Button.inline("< Back", data="help_back")]])
+                
+            elif data == "raid_help":
+                await event.edit(raid_msg, buttons=[[Button.inline("< Back", data="help_back")]])
+                
+            elif data == "extra_help":
+                await event.edit(extra_msg, buttons=[[Button.inline("< Back", data="help_back")]])
+        else:
+            await event.answer("Make Your Own Smoker Userbot! @TEAM_SMOKER", alert=True)
+          
