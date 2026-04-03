@@ -2,7 +2,7 @@ from telethon import events, Button
 from config import SUDO_USERS, hl, EXTRA_IMG
 
 # --- HELP STRINGS ---
-HELP_STRING = "★ @TEAM_SMOKER BOTS HELP MENU ★\n\n» **ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴꜱ ꜰᴏʀ ʜᴇʟᴘ**\n» **ᴅᴇᴠᴇʟᴏᴘᴇʀ: @TEAM_SMOKER**"
+HELP_STRING = "★ @lootversegc BOTS HELP MENU ★\n\n» **ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴꜱ ꜰᴏʀ ʜᴇʟᴘ**\n» **ᴅᴇᴠᴇʟᴏᴘᴇʀ: @Lootversegc**"
 
 extra_msg = f"""
 **» ᴇxᴛʀᴀ ᴄᴏᴍᴍᴀɴᴅꜱ:**
@@ -21,7 +21,7 @@ extra_msg = f"""
   1) {hl}leave <group/chat id>
   2) {hl}leave : Type in the Group bot will auto leave that group
 
-**© @TEAM_SMOKER**
+**© @lootversegc**
 """
 
 raid_msg = f"""
@@ -39,16 +39,7 @@ raid_msg = f"""
   1) {hl}drraid <replying to user>
   2) {hl}drraid <username>
 
-𝐌𝐑𝐚𝐢𝐝: **ʟᴏᴠᴇ ʀᴀɪᴅ ᴏɴ ᴛʜᴇ ᴜꜱᴇʀ.**
-  1) {hl}mraid <count> <username>
-
-𝐒𝐑𝐚𝐢𝐝: **ꜱʜᴀʏᴀʀɪ ʀᴀɪᴅ ᴏɴ ᴛʜᴇ ᴜꜱᴇʀ.**
-  1) {hl}sraid <count> <username>
-
-𝐂𝐑𝐚𝐢𝐝: **ᴀʙᴄᴅ ʀᴀɪᴅ ᴏɴ ᴛʜᴇ ᴜꜱᴇʀ.**
-  1) {hl}craid <count> <username>
-
-**© @TEAM_SMOKER**
+**© @lootversegc**
 """
 
 spam_msg = f"""
@@ -64,7 +55,7 @@ spam_msg = f"""
 𝗛𝗮𝗻𝗴: **ꜱᴘᴀᴍꜱ ʟᴀɢ ᴍᴇꜱꜱᴀɢᴇ.**
   1) {hl}hang <counter>
 
-** © @TEAM_SMOKER**
+** © @lootversegc**
 """
 
 # --- BUTTONS ---
@@ -77,7 +68,7 @@ HELP_BUTTON = [
       Button.inline("• ᴇxᴛʀᴀ •", data="extra_help")
     ],
     [
-      Button.url("• ᴄʜᴀɴɴᴇʟ •", "https://t.me/TEAM_SMOKER"),
+      Button.url("• ᴄʜᴀɴɴᴇʟ •", "https://t.me/lootversegc"),
       Button.url("• sᴜᴘᴘᴏʀᴛ •", "https://t.me/TEAM_SMOKER")
     ]
 ]
@@ -123,5 +114,5 @@ def register_help(client):
             elif data == "extra_help":
                 await event.edit(extra_msg, buttons=[[Button.inline("< Back", data="help_back")]])
         else:
-            await event.answer("Make Your Own Smoker Userbot! @TEAM_SMOKER", alert=True)
+            await event.answer("Make Your Own Smoker Userbot! @lootversegc", alert=True)
           
