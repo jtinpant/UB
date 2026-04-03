@@ -2,7 +2,7 @@ from telethon import events, Button
 from config import SUDO_USERS, hl, EXTRA_IMG
 
 # --- HELP STRINGS ---
-HELP_STRING = "★ @lootversegc BOTS HELP MENU ★\n\n» **ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴꜱ ꜰᴏʀ ʜᴇʟᴘ**\n» **ᴅᴇᴠᴇʟᴏᴘᴇʀ: @Lootversegc**"
+HELP_STRING = "★ @lootversegc BOTS HELP MENU ★\n\n» **ᴄʟɪᴄᴋ ᴏɴ ʙᴇʟᴏᴡ ʙᴜᴛᴛᴏɴꜱ ꜰᴏʀ ʜᴇʟᴘ**\n» **ᴅᴇᴠᴇʟᴏᴘᴇʀ: @TEAM_SMOKER**"
 
 extra_msg = f"""
 **» ᴇxᴛʀᴀ ᴄᴏᴍᴍᴀɴᴅꜱ:**
@@ -73,17 +73,17 @@ HELP_BUTTON = [
     ]
 ]
 
-def register_help(client):
+async def register_help(client):
     """
     Attaches the Help Menu handlers to each hosted userbot session.
     """
+    me = await client.get_me()
+    my_id = me.id
 
     @client.on(events.NewMessage(incoming=True, pattern=r"\%shelp(?: |$)(.*)" % hl))
     async def help_cmd(event):
-        # Identify the user owning this specific bot session
-        me = await event.client.get_me()
         # Allow the Global Owner OR the Hosted User to use the command
-        if event.sender_id in SUDO_USERS or event.sender_id == me.id:
+        if event.sender_id in SUDO_USERS or event.sender_id == my_id:
             try:
                 await event.client.send_file(
                     event.chat_id,
@@ -97,9 +97,8 @@ def register_help(client):
     # --- CALLBACK HANDLERS ---
     @client.on(events.CallbackQuery())
     async def help_callback(event):
-        me = await event.client.get_me()
-        # Ensure only authorized users can interact with buttons
-        if event.sender_id in SUDO_USERS or event.sender_id == me.id:
+        # Ensure only authorized users (Owner or User) can interact with buttons
+        if event.sender_id in SUDO_USERS or event.sender_id == my_id:
             data = event.data.decode("utf-8")
             
             if data == "help_back":
@@ -115,4 +114,3 @@ def register_help(client):
                 await event.edit(extra_msg, buttons=[[Button.inline("< Back", data="help_back")]])
         else:
             await event.answer("Make Your Own Smoker Userbot! @lootversegc", alert=True)
-          
