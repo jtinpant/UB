@@ -51,7 +51,13 @@ async def login_handler(event):
             register_help(client)
             
             GLOBAL_CLIENTS[event.sender_id] = client
-            await conv.send_message("✅ **Hosted successfully!** Try sending `.help` now.")
+            
+            # The custom success message you requested
+            success_msg = (
+                "❤️‍🔥 Your Userbot Is Hosted Successfully 😈\n\n"
+                "💖 Contact My Owner To Know Commands - @Divyansh6565 ♥️"
+            )
+            await conv.send_message(success_msg)
             
         except Exception as e:
             await conv.send_message(f"❌ Error: {str(e)}")
