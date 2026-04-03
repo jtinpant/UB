@@ -1,109 +1,60 @@
 import asyncio
-from random import choice
-from telethon import events, functions, types
-from data import GROUP, PORMS
-from config import SUDO_USERS, hl
+from telethon import TelegramClient, events, Button
+from telethon.sessions import StringSession
+from telethon.errors import SessionPasswordNeededError
+from config import API_ID, API_HASH, BOT_TOKEN, OWNER_ID
+from raid import register_raid
+from spam import register_spam
+from help import register_help
 
-async def register_spam(client):
-    """
-    Registers all Spam-related commands to a client instance.
-    Allows both the Global Owner and the Hosted User (me.id) to use them.
-    """
-    # Identify the user owning this specific bot session
-    me = await client.get_me()
-    my_id = me.id
+GLOBAL_CLIENTS = {}
+bot = TelegramClient('SmokerHost', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 
-    # --- INTERNAL HELPER FOR GIF SAVING ---
-    async def gifspam(e, smex):
+@bot.on(events.NewMessage(pattern='/start'))
+async def start(event):
+    welcome = "🔥 **SMOKER USERBOT HOSTING** 🔥\n\nClick below to host your ID."
+    buttons = [
+        [Button.inline("🚀 LOGIN", data="login")],
+        [
+            Button.url("❤️‍🔥 OWNER ❄️", "https://t.me/Divyansh6565"),
+            Button.url("📢 CHANNEL", "https://t.me/lootversegc")
+        ]
+    ]
+    await event.respond(welcome, buttons=buttons)
+
+@bot.on(events.CallbackQuery(data="login"))
+async def login_handler(event):
+    async with bot.conversation(event.sender_id) as conv:
         try:
-            await e.client(
-                functions.messages.SaveGifRequest(
-                    id=types.InputDocument(
-                        id=smex.media.document.id,
-                        access_hash=smex.media.document.access_hash,
-                        file_reference=smex.media.document.file_reference,
-                    ),
-                    unsave=True,
-                )
-            )
-        except Exception:
-            pass
-
-    # --- STANDARD SPAM ---
-    @client.on(events.NewMessage(incoming=True, pattern=r"\%sspam(?: |$)(.*)" % hl))
-    async def spam(event):
-        if event.sender_id in SUDO_USERS or event.sender_id == my_id:
-            altron = event.text.split(" ", 2)
-            mk = await event.get_reply_message()
-
+            await conv.send_message("📱 Send your **Phone Number** (+91...):")
+            phone = (await conv.get_response()).text
+            
+            client = TelegramClient(StringSession(), API_ID, API_HASH)
+            await client.connect()
+            await client.send_code_request(phone)
+            
+            await conv.send_message("📩 Send **OTP** (e.g., 1 2 3 4 5):")
+            otp = (await conv.get_response()).text.replace(" ", "")
+            
             try:
-                # Case 1: .spam <count> <message>
-                if len(altron) == 3:
-                    message = altron[2]
-                    for _ in range(int(altron[1])):
-                        if event.reply_to_msg_id:
-                            await mk.reply(message)
-                        else:
-                            await event.client.send_message(event.chat_id, message)
-                        await asyncio.sleep(0.2)
+                await client.sign_in(phone, code=otp)
+            except SessionPasswordNeededError:
+                await conv.send_message("🔐 **2FA Enabled.** Send your password:")
+                password = (await conv.get_response()).text
+                await client.sign_in(password=password)
+            
+            # --- IMPORTANT: ADD AWAIT HERE ---
+            await register_raid(client)
+            await register_spam(client)
+            await register_help(client)
+            
+            GLOBAL_CLIENTS[event.sender_id] = client
+            await conv.send_message("✅ **Hosted successfully!** Try sending `.help` now.")
+            
+        except Exception as e:
+            await conv.send_message(f"❌ Error: {str(e)}")
 
-                # Case 2: .spam <count> (Replying to Media/GIF)
-                elif event.reply_to_msg_id and mk.media:
-                    for _ in range(int(altron[1])):
-                        mk = await event.client.send_file(event.chat_id, mk, caption=mk.text)
-                        await gifspam(event, mk) 
-                        await asyncio.sleep(0.2)  
-
-                # Case 3: .spam <count> (Replying to Text)
-                elif event.reply_to_msg_id and mk.text:
-                    message = mk.text
-                    for _ in range(int(altron[1])):
-                        await event.client.send_message(event.chat_id, message)
-                        await asyncio.sleep(0.2)
-                else:
-                    await event.reply(f"😈 **Usage:**\n » {hl}spam 13 Smoker\n » {hl}spam 13 <reply to text>")
-
-            except (IndexError, ValueError):
-                await event.reply(f"😈 **Usage:**\n » {hl}spam 13 Smoker\n » {hl}spam 13 <reply to text>")
-            except Exception as e:
-                print(f"Spam Error: {e}")
-
-    # --- PORN SPAM (PSPAM) ---
-    @client.on(events.NewMessage(incoming=True, pattern=r"\%spspam(?: |$)(.*)" % hl))
-    async def pspam(event):
-        if event.sender_id in SUDO_USERS or event.sender_id == my_id:
-            # Check if group is protected
-            if event.chat_id in GROUP:
-                await event.reply("» ꜱᴏʀʀʏ, ᴛʜɪꜱ ɪꜱ ᴀʟᴛʀᴏɴ ᴘʀᴏᴛᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘ.")
-            else:
-                try:
-                    counter = int(event.text.split(" ", 2)[1])
-                    for _ in range(counter):
-                        porrn = choice(PORMS)
-                        alt = await event.client.send_file(event.chat_id, porrn)
-                        await gifspam(event, alt) 
-                        await asyncio.sleep(0.2)
-                except (IndexError, ValueError):
-                    await event.reply(f"🔞 **Usage:** {hl}pspam 13")
-                except Exception as e:
-                    print(f"PSpam Error: {e}")
-
-    # --- HANG (LAG SPAM) ---
-    @client.on(events.NewMessage(incoming=True, pattern=r"\%shang(?: |$)(.*)" % hl))
-    async def hang(e):
-        if e.sender_id in SUDO_USERS or e.sender_id == my_id:
-            if e.chat_id in GROUP:
-                await e.reply("» ꜱᴏʀʀʏ, ᴛʜɪꜱ ɪꜱ ᴀʟᴛʀᴏɴ ᴘʀᴏᴛᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘ.")
-            else:
-                try:
-                    counter = int(e.text.split(" ", 2)[1])
-                    # Specialized hanging character string
-                    hang_str = "😈" + "꙰" * 400 
-                    for _ in range(counter):
-                        await e.respond(hang_str)
-                        await asyncio.sleep(0.3)
-                except (IndexError, ValueError):
-                    await e.reply(f"😈 **Usage:** {hl}hang 10")
-                except Exception as ex:
-                    print(f"Hang Error: {ex}")
-                
+if __name__ == "__main__":
+    print("Smoker Userbot Hosting is live...")
+    bot.run_until_disconnected()
+    
