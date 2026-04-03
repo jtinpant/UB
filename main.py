@@ -27,48 +27,28 @@ async def login_handler(event):
     async with bot.conversation(event.sender_id) as conv:
         try:
             await conv.send_message("📱 Send your **Phone Number** (+91...):")
-            phone = (await conv.get_response()).text
+            phone_msg = await conv.get_response()
+            phone = phone_msg.text
             
             client = TelegramClient(StringSession(), API_ID, API_HASH)
             await client.connect()
             await client.send_code_request(phone)
             
             await conv.send_message("📩 Send **OTP** (e.g., 1 2 3 4 5):")
-            otp = (await conv.get_response()).text.replace(" ", "")
+            otp_msg = await conv.get_response()
+            otp = otp_msg.text.replace(" ", "")
             
             try:
                 await client.sign_in(phone, code=otp)
             except SessionPasswordNeededError:
                 await conv.send_message("🔐 **2FA Enabled.** Send your password:")
-                password = (await conv.get_response()).text
+                password_msg = await conv.get_response()
+                password = password_msg.text
                 await client.sign_in(password=password)
             
-            # FIXED: Removed 'await' so it doesn't crash with NoneType
             register_raid(client)
             register_spam(client)
             register_help(client)
-            
-            GLOBAL_CLIENTS[event.sender_id] = client
-            await conv.send_message("✅ **Hosted successfully!** Try sending `.help` now.")
-            
-        except Exception as e:
-            await conv.send_message(f"❌ Error: {str(e)}")
-
-if __name__ == "__main__":
-    bot.run_until_disconnected()
-            otp = (await conv.get_response()).text.replace(" ", "")
-            
-            try:
-                await client.sign_in(phone, code=otp)
-            except SessionPasswordNeededError:
-                await conv.send_message("🔐 **2FA Enabled.** Send your password:")
-                password = (await conv.get_response()).text
-                await client.sign_in(password=password)
-            
-            # --- IMPORTANT: ADD AWAIT HERE ---
-            await register_raid(client)
-            await register_spam(client)
-            await register_help(client)
             
             GLOBAL_CLIENTS[event.sender_id] = client
             await conv.send_message("✅ **Hosted successfully!** Try sending `.help` now.")
