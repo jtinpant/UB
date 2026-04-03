@@ -7,7 +7,7 @@ if os.path.exists(".env"):
 # ------------------------------ REQUIRED ------------------------------ #
 API_ID = int(os.getenv("API_ID", "27433131"))
 API_HASH = os.getenv("API_HASH", "7f8d967471ccadf83df1f199769b43e7")
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8579256317:AAGH40uDAKZXyW8rxDa-n0Sp5NGkUPaw5-4")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "7670587113:AAHq9cFC4TNLd8tul9FKcna3Z_m8dY8ZSk4")
 OWNER_ID = int(os.getenv("OWNER_ID", "5533647702"))
 
 # ------------------------------ SETTINGS ------------------------------ #
