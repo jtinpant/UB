@@ -134,4 +134,5 @@ def register_raid(client, log_bot, log_group):
                     await e.client.send_message(e.chat_id, f"{username} {choice(CRAID)}")
                     await asyncio.sleep(0.1)
             except: pass
-               
+
+                
